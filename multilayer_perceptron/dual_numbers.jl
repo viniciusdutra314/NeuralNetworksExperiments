@@ -11,6 +11,39 @@ zero(x::DualNumber) = DualNumber(zero(x.real), zero(x.dual))
 Base.:-(x::DualNumber) = DualNumber(-x.real, -x.dual)
 Base.:+(x::DualNumber) = x
 
+Base.:(==)(x::DualNumber, y::DualNumber) = (x.real == y.real) && (x.dual == y.dual)
+Base.:(==)(x::DualNumber, y::Real) = (x.real == y) && (x.dual == 0)
+Base.:(==)(x::Real, y::DualNumber) = (y.real == x) && (y.dual == 0)
+
+function Base.isless(x::DualNumber, y::DualNumber)
+    if x.real < y.real
+        return true
+    elseif x.real == y.real
+        return x.dual < y.dual
+    else
+        return false
+    end
+end
+
+function Base.isless(x::DualNumber, y::Real)
+    if x.real < y
+        return true
+    elseif x.real == y
+        return x.dual < 0 
+    else
+        return false
+    end
+end
+
+function Base.isless(x::Real, y::DualNumber)
+    if x < y.real
+        return true
+    elseif x == y.real
+        return 0 < y.dual 
+    else
+        return false
+    end
+end
 convert(::Type{DualNumber{T}}, x::DualNumber) where {T} = DualNumber(convert(T, x.real), convert(T, x.dual))
 convert(::Type{DualNumber{T}}, x::Real) where {T} = DualNumber(convert(T, x), zero(T))
 promote_rule(::Type{DualNumber{T}}, ::Type{S}) where {T<:Real, S<:Real} = DualNumber{promote_type(T, S)}
